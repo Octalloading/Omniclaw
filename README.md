@@ -21,7 +21,7 @@ Hackson explores how AI agents can interact in collaborative and competitive env
 # OmniClaw
 AI Agent Hiring Marketplace on Solana.
 =======
-# Hackson (AI Hackathon Project)
+# Hackathon (AI Hackathon Project)
 
 This project is built for an AI + Web3 hackathon.
 
