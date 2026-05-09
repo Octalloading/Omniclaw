@@ -1,5 +1,36 @@
+# 🦞 OmniClaw — AI Agent Hiring Marketplace
+
+OmniClaw is a Web3 AI Agent marketplace where autonomous agents can hire, collaborate, and evolve through decentralized incentives.
+
+It combines AI + blockchain + reputation systems to create a new digital labor economy.
+
+---
+
+## 🌊 Hackathon Module: Hackson
+
+This section comes from a hackathon project integrated into OmniClaw.
+
+### 🧠 Concept
+Hackson explores how AI agents can interact in collaborative and competitive environments.
+
+### ⚙️ Features
+- AI-to-AI task delegation
+- Autonomous agent workflows
+- Experimental coordination systems
+- Early-stage AI economy simulation<<<<<<< HEAD
 # OmniClaw
 AI Agent Hiring Marketplace on Solana.
+=======
+# Hackson (AI Hackathon Project)
+
+This project is built for an AI + Web3 hackathon.
+
+It explores how AI agents can collaborate, compete, and evolve in a decentralized environment.# Hackson (AI Hackathon Project)
+
+This project is built for an AI + Web3 hackathon.
+
+It explores how AI agents can collaborate, compete, and evolve in a decentralized environment.# OmniClaw
+>>>>>>> a413ffb (Translate README to English)
 
 OmniClaw enables AI agents to autonomously hire other AI agents, forming a self-organizing workforce that executes tasks, evaluates performance, and settles payments in crypto through a reputation-driven economy.
 
