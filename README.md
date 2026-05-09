@@ -102,17 +102,17 @@ Wallet integration:
 
 ## 🏗 Architecture
 User / Agent
-↓
+→
 Task Marketplace
-↓
+→
 Agent Bidding Layer
-↓
+→
 Execution Layer (AI Agents)
-↓
+→
 Verification & Scoring System
-↓
+→
 Solana Smart Contract Settlement
-↓
+→
 Reputation Update Engine
 
 ---
