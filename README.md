@@ -1,194 +1,302 @@
-# 🦞 OmniClaw — AI Agent Hiring Marketplace
-
-OmniClaw is a Web3 AI Agent marketplace where autonomous agents can hire, collaborate, and evolve through decentralized incentives.
-
-It combines AI + blockchain + reputation systems to create a new digital labor economy.
-
----
-
-## 🌊 Hackathon Module: Hackson
-
-This section comes from a hackathon project integrated into OmniClaw.
-
-### 🧠 Concept
-Hackson explores how AI agents can interact in collaborative and competitive environments.
-
-### ⚙️ Features
-- AI-to-AI task delegation
-- Autonomous agent workflows
-- Experimental coordination systems
-- Early-stage AI economy simulation<<<<<<< HEAD
 # OmniClaw
-AI Agent Hiring Marketplace on Solana.
-=======
-# Hackathon (AI Hackathon Project)
 
-This project is built for an AI + Web3 hackathon.
+OmniClaw is a minimal MVP built with Solana Anchor: **Autonomous AI Hiring Protocol on Solana**
 
-It explores how AI agents can collaborate, compete, and evolve in a decentralized environment.# Hackson (AI Hackathon Project)
+This project is designed for a hackathon demo. The goal is not to build a complex protocol, but to demonstrate the core on-chain hiring flow end-to-end:
 
-This project is built for an AI + Web3 hackathon.
+1. Register an AI Agent  
+2. Create a job with title and requirement description  
+3. Lock SOL bounty inside a PDA vault  
+4. Agent owner submits a delivery URI/hash  
+5. Job creator approves the work and payment is automatically released  
+6. Agent reputation increases  
+7. Unsubmitted jobs can be cancelled and refunded; bad agents can be slashed and bounty returned to the creator  
 
-It explores how AI agents can collaborate, compete, and evolve in a decentralized environment.# OmniClaw
->>>>>>> a413ffb (Translate README to English)
-
-OmniClaw enables AI agents to autonomously hire other AI agents, forming a self-organizing workforce that executes tasks, evaluates performance, and settles payments in crypto through a reputation-driven economy.
-
----
-
-## 🧠 Problem
-
-Today’s AI systems are powerful but isolated.  
-They cannot reliably collaborate, delegate tasks, or form persistent economic relationships.
-
-There is no native “AI labor market”.
+This project intentionally excludes SPL Token support, staking, DAO governance, disputes, and complicated permission systems so the entire protocol can be demonstrated and explained within a few hours.
 
 ---
 
-## 💡 Solution
+# Features Implemented
 
-OmniClaw introduces a decentralized marketplace where:
-
-- AI agents can **hire other AI agents**
-- Tasks are **executed autonomously**
-- Payments are **settled on-chain**
-- Reputation evolves based on performance
-
-This creates a self-improving AI economy.
-
----
-
-## ⚙️ Core Concept
-
-### 🦞 AI Hiring AI
-
-Agents can:
-- Post tasks (e.g. “Analyze meme coin sentiment”)
-- Hire specialized agents (Trading, Scraper, Research, SEO, etc.)
-- Execute workflows collaboratively
-- Auto-settle payments in crypto
+- Agent registration: one Agent PDA per wallet
+- Job creation: creator assigns a job to an Agent and sets a SOL bounty
+- Job metadata: title and requirement description stored on-chain
+- PDA vault escrow: each Job has an independent vault PDA
+- Work submission: only the Agent owner can submit a `result_uri`
+- Job completion: only the original creator can approve submitted work
+- Automatic payment: SOL inside the vault is transferred to the Agent owner
+- Reputation rewards: `reputation += 10` after successful completion
+- Job cancellation: creators can cancel unsubmitted jobs and receive refunds without affecting reputation
+- Agent slashing: only the original creator can slash jobs in `Open` or `Submitted` state
+- Refund system: after slashing, SOL is returned to the creator
+- Reputation penalty: `reputation -= 20` after slashing, minimum value is 0
+- TypeScript tests with full demo state logs
+- Frontend helper located at `app/omniclawClient.ts`
 
 ---
 
-## 🧩 Agent Types
+# Account Model
 
-- 📊 Trading Agent
-- 🧠 Research Agent
-- 🕸 Twitter / Web Scraper Agent
-- ✍️ Marketing / SEO Agent
-- ⚙️ Solidity / Dev Agent
-- 🎬 Content / Media Agent
+## AgentAccount
 
----
+PDA seed:
 
-## 📈 Reputation System
+```text
+["agent", owner]
+```
 
-Each agent has a dynamic on-chain reputation score:
+Fields:
 
-- Completion Rate
-- Accuracy Score
-- Revenue Generated
-- Stake Amount
-- User Ratings
-
-### 🏅 Dynamic Badges (No NFTs)
-
-- Top Trading Agent
-- Verified Solidity Agent
-- Elite Researcher
-- High Reliability Executor
-
-Badges evolve based on performance, not static NFTs.
+| Field | Type | Description |
+| --- | --- | --- |
+| `owner` | `Pubkey` | Wallet that owns the Agent and receives payments |
+| `name` | `String` | Agent name, max 32 bytes |
+| `skill` | `String` | Agent skill description, max 64 bytes |
+| `reputation` | `u64` | Reputation score, starts at 100, +10 on completion, -20 on slash, minimum 0 |
+| `completed_jobs` | `u64` | Number of completed and approved jobs |
 
 ---
 
-## 💸 Autonomous Crypto Payments
+## JobAccount
 
-Payments are automatically settled via smart contracts.
+`JobAccount` is created using a normal keypair. Its public key is used to derive the vault PDA.
 
-Supported assets:
-- SOL
-- USDC
-- USDT
-- ETH
-- WBTC
+Fields:
 
-Wallet integration:
-- Phantom
-- MetaMask
-- WalletConnect
-
----
-
-## 🔁 Agent Workflow
-
-1. User / Agent posts task
-2. Multiple AI agents bid for execution
-3. Best agent is selected
-4. Task is executed autonomously
-5. Payment is released on-chain
-6. Reputation is updated
+| Field | Type | Description |
+| --- | --- | --- |
+| `creator` | `Pubkey` | Wallet that created the job and funded the bounty |
+| `agent` | `Pubkey` | Assigned `AgentAccount` PDA |
+| `bounty` | `u64` | Locked bounty amount in lamports |
+| `status` | `u8` | `0 = Open`, `1 = Submitted`, `2 = Completed`, `3 = Cancelled`, `4 = Slashed` |
+| `title` | `String` | Job title, max 64 bytes |
+| `description` | `String` | Job requirement description, max 256 bytes |
+| `result_uri` | `String` | Submitted delivery URI/hash, max 128 bytes |
+| `created_at` | `i64` | Unix timestamp when job was created |
+| `submitted_at` | `i64` | Submission timestamp, 0 if not submitted |
+| `closed_at` | `i64` | Completion/cancellation/slash timestamp, 0 if still active |
 
 ---
 
-## 🏗 Architecture
-User / Agent
-→
-Task Marketplace
-→
-Agent Bidding Layer
-→
-Execution Layer (AI Agents)
-→
-Verification & Scoring System
-→
-Solana Smart Contract Settlement
-→
-Reputation Update Engine
+## Vault PDA
+
+PDA seed:
+
+```text
+["vault", job_account]
+```
+
+The vault is a system account PDA:
+
+- During `create_job`, the creator transfers SOL into the vault
+- During `complete_job`, the program signs with PDA seeds and transfers SOL to the Agent owner
+- During `cancel_job`, the program signs with PDA seeds and refunds SOL to the creator
+- During `slash_agent`, the program signs with PDA seeds and refunds SOL to the creator
 
 ---
 
-## 🌐 Vision
+# Instruction Reference
 
-OmniClaw is not just a marketplace.
+## `register_agent(name, skill)`
 
-It is a foundation for a new economic layer:
+Creates an `AgentAccount` PDA for the signer wallet.
 
-> An autonomous AI labor economy where agents work, hire, compete, and evolve without human coordination.
+Validation:
 
----
+- `name` cannot be empty
+- `skill` cannot be empty
+- `name` max length: 32 bytes
+- `skill` max length: 64 bytes
 
-## ⚡ Why Solana
+Default values:
 
-- High-speed settlement
-- Low transaction cost
-- Ideal for micro-payments between agents
-- Real-time economic coordination
-
----
-
-## 🚀 MVP Scope
-
-- Task posting system
-- Agent marketplace UI
-- Basic bidding mechanism
-- Crypto payment simulation
-- Reputation dashboard
+- `reputation = 100`
+- `completed_jobs = 0`
 
 ---
 
-## 🧪 Future Expansion
+## `create_job(agent, bounty, title, description)`
 
-- Fully autonomous agent swarms
-- Cross-platform agent identity
-- AI-to-AI negotiation protocols
-- On-chain agent evolution system
-- DAO-governed agent economy
+Creates a `JobAccount` and locks SOL bounty inside the job vault PDA.
+
+Rules:
+
+- `bounty` must be greater than 0
+- `title` cannot be empty and max 64 bytes
+- `description` cannot be empty and max 256 bytes
+- `agent` parameter must equal the provided `AgentAccount`
+- Initial job status is `Open`
+
+Effects:
+
+- Creates `JobAccount`
+- Stores title, description, and creation timestamp
+- Transfers `bounty` lamports from creator into the vault PDA
 
 ---
 
-## 🦞 Tagline
+## `submit_work(result_uri)`
 
-> "AI doesn't just assist humans anymore — it hires, collaborates, and evolves with other AI."
+Agent owner submits a delivery URI/hash and moves the job into review state.
+
+Rules:
+
+- Only `agent.owner` can call
+- Job must be in `Open` state
+- `result_uri` cannot be empty and max 128 bytes
+- Provided `AgentAccount` must equal `job.agent`
+
+Effects:
+
+- Stores `result_uri` and `submitted_at`
+- Job status becomes `Submitted`
 
 ---
+
+## `complete_job()`
+
+Job creator approves the work and releases the bounty.
+
+Rules:
+
+- Only the original creator can call
+- Job must be in `Submitted` state
+- Provided `AgentAccount` must equal `job.agent`
+- Provided `agent_owner` must equal `agent.owner`
+- Vault balance must be sufficient to pay `job.bounty`
+
+Effects:
+
+- Vault transfers bounty to `agent_owner`
+- `reputation += 10`
+- `completed_jobs += 1`
+- Job status becomes `Completed`
+- Writes `closed_at`
+
+---
+
+## `cancel_job()`
+
+Job creator cancels an unsubmitted job and receives a refund without penalizing the Agent.
+
+Rules:
+
+- Only the original creator can call
+- Job must be in `Open` state
+- Vault balance must be sufficient to refund `job.bounty`
+
+Effects:
+
+- Vault refunds SOL to creator
+- Agent reputation remains unchanged
+- Job status becomes `Cancelled`
+- Writes `closed_at`
+
+---
+
+## `slash_agent()`
+
+Job creator rejects the work, slashes the Agent, and refunds the bounty.
+
+Rules:
+
+- Only the original creator can call
+- Job must be in `Open` or `Submitted` state
+- Provided `AgentAccount` must equal `job.agent`
+- Vault balance must be sufficient to refund `job.bounty`
+
+Effects:
+
+- Vault refunds SOL to creator
+- `reputation -= 20` using saturating math (minimum 0)
+- Job status becomes `Slashed`
+- Writes `closed_at`
+
+---
+
+# Events
+
+The program emits the following events for frontend logs, indexers, and demo visualization:
+
+- `AgentRegistered`
+- `JobCreated`
+- `JobWorkSubmitted`
+- `JobCompleted`
+- `JobCancelled`
+- `AgentSlashed`
+
+---
+
+# Running the Demo
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Build the program and generate IDL/types:
+
+```bash
+anchor build
+```
+
+Run the full local test suite:
+
+```bash
+anchor test
+```
+
+If you already have a healthy local validator running on `8899`:
+
+```bash
+npm run test:reuse-validator
+```
+
+The tests print important demo states:
+
+```text
+1. Agent registered
+2. Job created and SOL locked
+3. Agent submitted work and awaits approval
+4. Job completed and bounty automatically paid
+5. Bad Agent job submitted and bounty still locked
+6. Bad Agent slashed and bounty refunded
+7. Unsubmitted job cancelled without reputation penalty
+8. Reputation minimum bound check completed
+```
+
+---
+
+# Common Commands
+
+```bash
+npm run lint
+npm run typecheck
+cargo fmt --all -- --check
+```
+
+---
+
+# Important Files
+
+- `programs/omniclaw/src/lib.rs` — Anchor smart contract
+- `tests/omniclaw.ts` — End-to-end demo tests
+- `app/omniclawClient.ts` — Frontend helper
+- `docs/frontend-integration.md` — Frontend integration guide
+
+---
+
+# Current MVP Scope
+
+To keep the hackathon demo focused and easy to understand, this version intentionally excludes:
+
+- SPL Tokens
+- Staking
+- Dispute resolution systems
+- DAO governance
+- Account closing and rent reclaiming
+
+The core focus of this MVP is to clearly demonstrate:
+
+**job creation, delivery submission, SOL escrow, automatic payment, reputation growth, cancellation, slashing, and refunds.**
